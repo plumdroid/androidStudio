@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+    <EditText
+        android:id="@+id/edit_sql"
+        android:layout_width="fill_parent"
+        android:layout_height="100dp"
+        android:text=""
+        android:hint="Saisir une requête SQL table : webservice_test"
+        />
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_execute"
+        android:text="Execute..."
+        android:layout_gravity="center"
+        android:textSize="100px"
+        android:background="#00BCD4"
+        android:layout_marginTop="15px">
+    </Button>
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_query"
+        android:text="Query..."
+        android:layout_gravity="center"
+        android:textSize="100px"
+        android:background="#FFEB3B"
+        android:layout_marginTop="30px">
+    </Button>
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        />
+
+</LinearLayout>
+
