@@ -1,6 +1,7 @@
 package formation.exemple.helloplumdatabase3;
 
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +13,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 import plum.webservice.norest.PlumDataBase;
 import plum.webservice.norest.PlumDataBaseException;
@@ -135,7 +138,8 @@ public class MainActivity extends AppCompatActivity  {
             EditText edit_sql = (EditText) findViewById(R.id.edit_sql);
             sql = edit_sql.getText().toString();
 
-            String message = "";
+            String message;
+
             if (reponse.pdo.error != 0) {
                 message = "::ERREURQUERY..."
                         .concat("::SQL = " + sql)
@@ -143,28 +147,16 @@ public class MainActivity extends AppCompatActivity  {
                 MessageDialog.show(context, message, "Fermer");
             }
 
-            Cursor c = null;
-            String[] from = null;
-            int[] to = null;
+
+            ArrayList<ContentValues> row = reponse.pdo.listContentValues;
 
             if (reponse.pdo.rowCount == 0) {
                 Toast.makeText(getApplicationContext(),
                         "QUERY : table vide", Toast.LENGTH_LONG).show();
-
-            } else {
-                c = reponse.pdo.cursor;
-                // Définir le mappage entre les colonnes et les lignes du ListView
-                from = new String[]{c.getColumnName(0), c.getColumnName(1)};
-                to = new int[]{R.id.id, R.id.lib,};
-
             }
 
             // Affichage du ListView
-            SimpleCursorAdapter liste;
-            liste = new SimpleCursorAdapter(context, R.layout.row, c, from, to);
 
-            ListView listview_test = (ListView) findViewById(android.R.id.list);
-            listview_test.setAdapter(liste);
 
         }
     }

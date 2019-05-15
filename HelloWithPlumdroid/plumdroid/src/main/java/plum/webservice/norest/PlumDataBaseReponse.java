@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 
@@ -54,7 +55,8 @@ public final class PlumDataBaseReponse {
 				throw new PlumDataBaseException("Error Récupération des données "+e.toString(),"","");
 			}	
 		}
-			
+
+
 	    public class PDO {
 	    	
 	    	public final int error;//0 tout est ok
@@ -63,7 +65,7 @@ public final class PlumDataBaseReponse {
 			public final String errorInfo;
 			public final long rowCount;
 			
-			public final Cursor cursor;
+			public final ArrayList<ContentValues> listContentValues;
 			
 	    	public PDO(JSONObject jsonPdo)throws PlumDataBaseException{
 	    		try{
@@ -79,17 +81,66 @@ public final class PlumDataBaseReponse {
 	    			else{error=-1;}
 	    			
 	    			if(jsonPdo.has("tupple")){
-	    				cursor=buildCursor(jsonPdo.getJSONArray("tupple"));
+	    				//cursor=buildCursor(jsonPdo.getJSONArray("tupple"));
+						listContentValues = buildListContentValues(jsonPdo.getJSONArray("tupple"));
 	    			}
 	    			else{
-	    				cursor=null;
+						listContentValues = null;
 	    			}
 				
 			}catch(JSONException e){
 				throw new PlumDataBaseException("Error PDO "+e.toString(),"","");
 			}
 	    	}
-			
+
+	    	/*
+	    	* Retourne sous la forme d'un ContentValues un ArrayList de la requête réalisée
+	    	* ContentValues : couple (clé,valeur)
+	    	*
+	    	*
+	    	*/
+			private ArrayList<ContentValues> buildListContentValues(JSONArray jsonTupple) throws PlumDataBaseException{
+
+				if(rowCount == 0){ return new ArrayList<ContentValues>(); }
+
+				ArrayList<ContentValues> listContentValues = null;
+
+				try{
+
+
+					//column
+					JSONObject jsonLine = jsonTupple.getJSONObject(0);
+					Iterator<String> iteratorKeys = jsonLine.keys();
+					ArrayList<String> arrayKeys = new ArrayList<String>();
+
+					int i=0;
+					while(iteratorKeys.hasNext()){
+						arrayKeys.add(iteratorKeys.next());
+					}
+
+					String[] column = new String[arrayKeys.size()];
+					column = arrayKeys.toArray(column);
+
+					for(i = 0; i < jsonTupple.length(); i++){
+
+						jsonLine = jsonTupple.getJSONObject(i);
+
+						ContentValues row = new ContentValues();
+						for(int j=0; j<column.length; j++){
+							row.put(column[j],jsonLine.getString(column[j]));
+						}
+
+						listContentValues.add(row);
+					}
+
+				}catch(JSONException e){
+					throw new PlumDataBaseException("Error PDO.buildListContentValues "+e.toString(),"","");
+				}
+
+				return  listContentValues;
+			}
+
+			// buildCursor est ... !!!! OBSOLETE ... !!!!
 	    	private Cursor buildCursor(JSONArray jsonTupple) throws PlumDataBaseException{
 		    	
 		    	if(rowCount==0){return new MatrixCursor(new String[]{"_id"});}
