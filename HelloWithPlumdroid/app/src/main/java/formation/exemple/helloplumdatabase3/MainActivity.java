@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity  {
 
         //Création de PlumDataBase : paramètre=URL du webservice
         //le localhost avec AVD android est http://10.0.2.2/
+
         webdata=new PlumDataBase("http://10.0.2.2:8080/PlumWebServiceDb/www/e/norest/");
 
         //-- Contact --
@@ -80,8 +81,8 @@ public class MainActivity extends AppCompatActivity  {
 
         @Override
         public void onError(PlumDataBaseException error) {
-            String message = "ERROR EXECUTE..." + error.toString();
-            MessageDialog.show(getApplicationContext(), message, "Fermer");
+            String message = "ERROR FATALE EXECUTE..." + error.toString();
+            MessageDialog.show(context, message, "Fermer");
             Log.i("Error contact", message);
         }
 
@@ -97,7 +98,7 @@ public class MainActivity extends AppCompatActivity  {
                         .concat("::SQL = " + sql)
                         .concat("::rowCount = " + reponse.pdo.rowCount);
             } else {
-                message = "::ERREUR EXECUTE..."
+                message = "::ERREUR EXECUTE SQL..."
                         .concat("::SQL = " + sql)
                         .concat("::erreur SQL = " + reponse.pdo.errorInfo);
 
@@ -111,7 +112,7 @@ public class MainActivity extends AppCompatActivity  {
     public class QueryListener implements View.OnClickListener,
             PlumDataBase.OnErrorListener,
             PlumDataBase.OnReponseListener {
-        Context context;
+            Context context;
 
         public QueryListener(Context context) {
             this.context = context;
@@ -127,9 +128,9 @@ public class MainActivity extends AppCompatActivity  {
 
         @Override
         public void onError(PlumDataBaseException error) {
-            String message = "ERROR EXECUTE..." + error.toString();
-            MessageDialog.show(getApplicationContext(), message, "Fermer");
-            Log.i("Error contact", message);
+            String message = "ERROR FATALE QUERY..." + error.toString();
+            MessageDialog.show(context, message, "Fermer");
+            Log.i("Error query", message);
         }
 
         @Override
@@ -140,6 +141,7 @@ public class MainActivity extends AppCompatActivity  {
 
             String message;
 
+            // Uniquement en phase de test !!
             if (reponse.pdo.error != 0) {
                 message = "::ERREURQUERY..."
                         .concat("::SQL = " + sql)
@@ -148,16 +150,20 @@ public class MainActivity extends AppCompatActivity  {
             }
 
 
-            ArrayList<ContentValues> row = reponse.pdo.listContentValues;
+            ArrayList<ContentValues> rows = reponse.pdo.listContentValues;
 
-            if (reponse.pdo.rowCount == 0) {
+                        if (reponse.pdo.rowCount == 0) {
                 Toast.makeText(getApplicationContext(),
                         "QUERY : table vide", Toast.LENGTH_LONG).show();
             }
 
             // Affichage du ListView
+            //-- Lier les données avec l'adapter de Type ProduitArrayAdapter
+            ContentValuesArrayAdapter ad =
+                    new ContentValuesArrayAdapter(context, rows);
 
-
-        }
-    }
+            //-- L'adaptateur Sert de source de données au ListView
+            ListView lv = (ListView) findViewById(R.id.list);
+            lv.setAdapter( ad );
+    }}
 }

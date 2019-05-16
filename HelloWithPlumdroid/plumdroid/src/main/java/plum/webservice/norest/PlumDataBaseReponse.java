@@ -85,7 +85,7 @@ public final class PlumDataBaseReponse {
 						listContentValues = buildListContentValues(jsonPdo.getJSONArray("tupple"));
 	    			}
 	    			else{
-						listContentValues = null;
+						listContentValues = new ArrayList();
 	    			}
 				
 			}catch(JSONException e){
@@ -94,21 +94,18 @@ public final class PlumDataBaseReponse {
 	    	}
 
 	    	/*
-	    	* Retourne sous la forme d'un ContentValues un ArrayList de la requête réalisée
-	    	* ContentValues : couple (clé,valeur)
+	    	* Retourne sous la forme ContentValues un ArrayList de la requête réalisée
+	    	* Un ligne tupple = un ContentValue contenant des couples  couple (nomColonne,valeur)
 	    	*
 	    	*
 	    	*/
 			private ArrayList<ContentValues> buildListContentValues(JSONArray jsonTupple) throws PlumDataBaseException{
+				if(rowCount == 0){ return new ArrayList<ContentValues>() ; }
 
-				if(rowCount == 0){ return new ArrayList<ContentValues>(); }
-
-				ArrayList<ContentValues> listContentValues = null;
-
+                ArrayList<ContentValues> listContentValues = new ArrayList<ContentValues>();
 				try{
 
-
-					//column
+				    //column
 					JSONObject jsonLine = jsonTupple.getJSONObject(0);
 					Iterator<String> iteratorKeys = jsonLine.keys();
 					ArrayList<String> arrayKeys = new ArrayList<String>();
@@ -120,6 +117,7 @@ public final class PlumDataBaseReponse {
 
 					String[] column = new String[arrayKeys.size()];
 					column = arrayKeys.toArray(column);
+
 
 					for(i = 0; i < jsonTupple.length(); i++){
 
