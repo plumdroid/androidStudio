@@ -124,6 +124,16 @@ public class MainActivity extends AppCompatActivity  {
             EditText edit_sql = (EditText) findViewById(R.id.edit_sql);
             sql = edit_sql.getText().toString();
             webdata.query(sql, this, this);
+
+            sql="select lib from webservice_test";
+
+            webdata.query(sql,
+                    new PlumDataBase.OnReponseListener(){
+                        @Override
+                        public void onReponse(PlumDataBaseReponse reponse) {
+                            Log.i("handle_query2",this.toString());
+                        }} ,
+                    this);
         }
 
         @Override
@@ -140,7 +150,7 @@ public class MainActivity extends AppCompatActivity  {
             sql = edit_sql.getText().toString();
 
             String message;
-
+            Log.i("handle_query1",this.toString());
             // Uniquement en phase de test !!
             if (reponse.pdo.error != 0) {
                 message = "::ERREURQUERY..."

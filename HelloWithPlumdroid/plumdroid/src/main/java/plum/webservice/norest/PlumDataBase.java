@@ -35,9 +35,6 @@ public class PlumDataBase {
 
 	protected final String url;
 
-	// This handler used to listen to child thread show return page html text message and display those text in responseTextView.
-	private Handler uiUpdater = null;
-
 	private static final int HTTP_REQUEST_RESPONSE = 1;
 	private static final String KEY_RESPONSE_WEBSERVICE="KEY_RESPONSE_WEBSERVICE";
 	private static final String KEY_EXCEPTION="KEY_EXCEPTION";
@@ -63,7 +60,7 @@ public class PlumDataBase {
 		HashMap<String, String> params = new HashMap<>();
 
 		String http = url + "contact/hello/";//url+"contact/hello/";//"http://www.fnac.com/";//
-		httpWebService( http, params, WEBSERVICE_CONTACT, onReponseListener, onErrorListener );
+		new HttpWebService( http, params, WEBSERVICE_CONTACT, onReponseListener, onErrorListener );
 
 		return;
 	}
@@ -80,7 +77,7 @@ public class PlumDataBase {
 		params.put("password", password);
 
 		String http = url + "authentification/connecter/";
-		httpWebService( http, params, WEBSERVICE_AUTHENTICATION, onReponseListener, onErrorListener );
+		new HttpWebService( http, params, WEBSERVICE_AUTHENTICATION, onReponseListener, onErrorListener );
 
 		return;
 	}
@@ -97,7 +94,7 @@ public class PlumDataBase {
 
 
 		String http = url + "webservice/execute/";
-		httpWebService( http, params, WEBSERVICE_EXECUTE, onReponseListener, onErrorListener );
+		new HttpWebService( http, params, WEBSERVICE_EXECUTE, onReponseListener, onErrorListener );
 
 		return;
 
@@ -123,7 +120,7 @@ public class PlumDataBase {
 		}
 
 		String http = url + "webservice/execute/";
-		httpWebService( http, params, WEBSERVICE_EXECUTE, onReponseListener, onErrorListener );
+		new HttpWebService( http, params, WEBSERVICE_EXECUTE, onReponseListener, onErrorListener );
 
 		return;
 
@@ -141,7 +138,7 @@ public class PlumDataBase {
 		params.put("requete", sql);
 
 		String http = url + "webservice/query/";
-		httpWebService( http, params, WEBSERVICE_QUERY, onReponseListener, onErrorListener );
+		new HttpWebService( http, params, WEBSERVICE_QUERY, onReponseListener, onErrorListener );
 
 		return;
 	}
@@ -165,29 +162,39 @@ public class PlumDataBase {
 		}
 
 		String http = url + "webservice/query/";
-		httpWebService( http, params, WEBSERVICE_QUERY, onReponseListener, onErrorListener );
+		new HttpWebService( http, params, WEBSERVICE_QUERY, onReponseListener, onErrorListener );
 
 		return;
 	}
+	/// ----- interface permettant de traiter la réponse d'une action de PlumDataBase  ////
+	public  static interface  OnReponseListener {
+		public abstract void onReponse( PlumDataBaseReponse reponse);}
+
+	public  static interface  OnErrorListener {
+		public abstract void onError( PlumDataBaseException error);}
 
 	/*
 	 * Acces HTTP
 	 *
 	 * return JSONObject
 	 */
-	@SuppressLint("HandlerLeak")
-	private void httpWebService(final String urlwebservice,
-								final HashMap params,
-								final int webService,
-								final PlumDataBase.OnReponseListener onReponseListener,
-								final PlumDataBase.OnErrorListener onErrorListener) {
+	
+	public class HttpWebService {
+		// This handler used to listen to child thread show return page html text message and display those text in responseTextView.
+		public Handler uiUpdater = null;
+		@SuppressLint("HandlerLeak")
+		public HttpWebService(final String urlwebservice,
+									final HashMap params,
+									final int webService,
+									final PlumDataBase.OnReponseListener onReponseListener,
+									final PlumDataBase.OnErrorListener onErrorListener) {
 
-        // This handler is used to wait for child thread message to update server response
+			// This handler is used to wait for child thread message to update server response
 
-		//Handler uiUpdater = null;
-		uiUpdater = new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
+			//Handler uiUpdater = null;
+			uiUpdater = new Handler() {
+				@Override
+				public void handleMessage(Message msg) {
 					if (msg.what != HTTP_REQUEST_RESPONSE) return;
 
 					Bundle bundle = msg.getData();
@@ -195,7 +202,7 @@ public class PlumDataBase {
 
 					String exception = bundle.getString(KEY_EXCEPTION);
 					if (exception != null) {
-                        onErrorListener.onError(new PlumDataBaseException(exception,"",""));
+						onErrorListener.onError(new PlumDataBaseException(exception, "", ""));
 						return;
 					}
 
@@ -205,7 +212,7 @@ public class PlumDataBase {
 					try {
 						d = new PlumDataBaseReponse(response, url, bundle.getInt(KEY_WEBSERVICE));
 					} catch (PlumDataBaseException e) {
-                        onErrorListener.onError(new PlumDataBaseException(exception,"",""));
+						onErrorListener.onError(new PlumDataBaseException(exception, "", ""));
 						return;
 					}
 
@@ -214,117 +221,106 @@ public class PlumDataBase {
 				}
 
 
-        };
+			};
 
-        //Thread accédant au webservice : rend la main à uiUpdater
-		final Thread sendHttpRequestThread = new Thread() {
-			@Override
-			public void run() {
+			//Thread accédant au webservice : rend la main à uiUpdater
+			final Thread sendHttpRequestThread = new Thread() {
+				@Override
+				public void run() {
 
-				Bundle bundle = new Bundle();
-				bundle.putInt(KEY_WEBSERVICE,webService);
+					Bundle bundle = new Bundle();
+					bundle.putInt(KEY_WEBSERVICE, webService);
 
-				String exception = null;
+					String exception = null;
 
-				String paramPost = "";
-				if (params != null && params.size() > 0) {
-					String et = "";
+					String paramPost = "";
+					if (params != null && params.size() > 0) {
+						String et = "";
 
-					Set<String> keys = params.keySet();
-					for (String key : keys) {
-						paramPost += et + key + "=" + params.get(key);
-						et = "&";
-					}
-				}
-
-				String line = "";
-
-				HttpURLConnection http = null;
-				InputStreamReader isReader = null;
-
-				String urlString = urlwebservice;
-				try {
-					URL url = new URL(urlwebservice);
-
-					http = (HttpURLConnection) url.openConnection();
-
-					http.setConnectTimeout(10000);
-					http.setRequestMethod("POST");
-					http.setDoInput(true);
-					http.setDoOutput(true);
-
-					// POST à envoyer ?
-					if ( !paramPost.equals("")) {
-						http.setFixedLengthStreamingMode(paramPost.getBytes().length);
-
-						PrintWriter out = new PrintWriter(http.getOutputStream());
-						out.print(paramPost);
-						out.close();
-					}
-					//http.setRequestProperty("Content-Type",
-					//		"application/x-www-form-urlencoded");
-
-					InputStream in;
-					in = new BufferedInputStream(http.getInputStream());
-
-					InputStreamReader inr = new InputStreamReader(in, "UTF-8");
-					BufferedReader reader = new BufferedReader(inr);
-					String inputLine;
-					while ((inputLine = reader.readLine()) != null) {
-						line += inputLine;
+						Set<String> keys = params.keySet();
+						for (String key : keys) {
+							paramPost += et + key + "=" + params.get(key);
+							et = "&";
+						}
 					}
 
-				} catch (
-						MalformedURLException e) {
-					exception = PlumDataBaseException.toStringException("Error in http connection URL malformed:" + e.toString(), urlwebservice, "");
-				} catch (
-						SocketTimeoutException e) {
+					String line = "";
+
+					HttpURLConnection http = null;
+					InputStreamReader isReader = null;
+
+					String urlString = urlwebservice;
+					try {
+						URL url = new URL(urlwebservice);
+
+						http = (HttpURLConnection) url.openConnection();
+
+						http.setConnectTimeout(10000);
+						http.setRequestMethod("POST");
+						http.setDoInput(true);
+						http.setDoOutput(true);
+
+						// POST à envoyer ?
+						if (!paramPost.equals("")) {
+							http.setFixedLengthStreamingMode(paramPost.getBytes().length);
+
+							PrintWriter out = new PrintWriter(http.getOutputStream());
+							out.print(paramPost);
+							out.close();
+						}
+						//http.setRequestProperty("Content-Type",
+						//		"application/x-www-form-urlencoded");
+
+						InputStream in;
+						in = new BufferedInputStream(http.getInputStream());
+
+						InputStreamReader inr = new InputStreamReader(in, "UTF-8");
+						BufferedReader reader = new BufferedReader(inr);
+						String inputLine;
+						while ((inputLine = reader.readLine()) != null) {
+							line += inputLine;
+						}
+
+					} catch (
+							MalformedURLException e) {
+						exception = PlumDataBaseException.toStringException("Error in http connection URL malformed:" + e.toString(), urlwebservice, "");
+					} catch (
+							SocketTimeoutException e) {
 						exception = PlumDataBaseException.toStringException("Error in http connection timeout:" + e.toString(), urlwebservice, "");
-				} catch (
-						IOException e) {
-					exception = PlumDataBaseException.toStringException("Error in http connection io:" + e.toString(), urlwebservice, "");
-				} finally {
-					// http.disconnect();
+					} catch (
+							IOException e) {
+						exception = PlumDataBaseException.toStringException("Error in http connection io:" + e.toString(), urlwebservice, "");
+					} finally {
+						// http.disconnect();
+					}
+
+					// Send message to main thread to update response text in TextView after read all.
+					Message message = new Message();
+
+					// Set message type.
+					message.what = HTTP_REQUEST_RESPONSE;
+
+					// Create a bundle object.
+
+					// Put response text in the bundle with the special key.
+					bundle.putString(KEY_RESPONSE_WEBSERVICE, line);
+					// Set bundle data in message.
+					bundle.putString(KEY_EXCEPTION, exception);
+
+					message.setData(bundle);
+					// Send message to main thread Handler to process.
+					uiUpdater.sendMessage(message);
 				}
+			};
 
-				// Send message to main thread to update response text in TextView after read all.
-				Message message = new Message();
+			//Lancer le Thread défini au dessus
+			/*Log.i("handle_uiUpater",uiUpdater.toString());
+			Log.i("handle_HttpWebservice",this.toString());
+			Log.i("handle_onReponse",onReponseListener.toString());*/
+			sendHttpRequestThread.start();
 
-				// Set message type.
-				message.what = HTTP_REQUEST_RESPONSE;
+		}
 
-				// Create a bundle object.
-
-				// Put response text in the bundle with the special key.
-				bundle.putString(KEY_RESPONSE_WEBSERVICE, line);
-				// Set bundle data in message.
-				bundle.putString(KEY_EXCEPTION, exception);
-
-				message.setData(bundle);
-				// Send message to main thread Handler to process.
-				uiUpdater.sendMessage(message);
-			}
-		};
-
-        //Lancer le Thread défini au dessus
-		sendHttpRequestThread.start();
-
-	}
-
-    private void callbackError ( PlumDataBase.OnErrorListener onErrorListener, String exception){
-        if(exception!=null){
-            if(onErrorListener!=null){
-                onErrorListener.onError(new PlumDataBaseException(exception,"",""));
-            }else{
-                return;
-            }
-        }
-    }
-
-	/// ----- interface permettant de traiter la réponse d'une action de PlumDataBase  ////
-	public  static interface  OnReponseListener {
-		public abstract void onReponse( PlumDataBaseReponse reponse);}
-
-	public  static interface  OnErrorListener {
-		public abstract void onError( PlumDataBaseException error);}
+		}
+	
 }

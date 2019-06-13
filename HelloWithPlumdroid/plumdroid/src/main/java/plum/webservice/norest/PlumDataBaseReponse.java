@@ -52,7 +52,7 @@ public final class PlumDataBaseReponse {
 					}
 				
 			}catch(JSONException e){
-				throw new PlumDataBaseException("Error Récupération des données "+e.toString(),"","");
+				throw new PlumDataBaseException("Error JSON Récupération des données "+e.toString(),"","");
 			}	
 		}
 
@@ -64,6 +64,7 @@ public final class PlumDataBaseReponse {
 	    	public final String errorCode;
 			public final String errorInfo;
 			public final long rowCount;
+			public final String lastInsertId;
 			
 			public final ArrayList<ContentValues> listContentValues;
 			
@@ -71,12 +72,19 @@ public final class PlumDataBaseReponse {
 	    		try{
 	    			
 	    			rowCount=jsonPdo.getLong("rowCount");
+
+					if (jsonPdo.has("lastInsertId")) {
+						lastInsertId = jsonPdo.getString("lastInsertId");
+					}else{
+						lastInsertId = "";
+					}
 	    			
 	    			JSONObject jsonError=jsonPdo.getJSONObject("error");
 	    			errorCode=jsonError.getString("errorCode");
 	    			errorInfo=jsonError.getString("errorInfo");
-	    			
-	    					
+
+
+
 	    			if(errorCode.equals("0")){error=0;}
 	    			else{error=-1;}
 	    			
