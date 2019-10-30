@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Hello ListView</string>
+    <string name="no_notes">Aucun pays</string>
+</resources>
