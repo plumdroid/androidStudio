@@ -5,11 +5,14 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+                          implements AdapterView.OnItemClickListener {
 
     private ListView lv;
 
@@ -29,9 +32,25 @@ public class MainActivity extends AppCompatActivity {
         //l'adaptateur Sert de source de données au ListView
         lv = (ListView) findViewById(R.id.list);
         lv.setAdapter(arrayAdapterCountries );
+        lv.setOnItemClickListener(this);
+
+        arrayAdapterCountries.notifyDataSetChanged();
 
 
     }
+
+    @Override
+    public void onItemClick(AdapterView<?> ad, View v, int pos, long id) {
+        // When clicked, show a toast with the TextView text
+        String  itemValue = (String) ad.getItemAtPosition(pos);
+
+        Toast toast = Toast.makeText(getApplicationContext(),
+                                    "Position : " + pos
+                                     +" Item : "+ itemValue,
+                                     Toast.LENGTH_LONG);
+        toast.show();
+    }
+
     private String[] getCountries()
     { return  new String[] {
             "Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra",
