@@ -1,0 +1,57 @@
+<LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content"
+    android:layout_width="fill_parent"
+    android:orientation="horizontal"
+    android:paddingBottom="10sp"
+    android:paddingTop="10sp"
+    android:paddingLeft="10sp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="40sp"
+        android:layout_height="fill_parent"
+        app:srcCompat="@drawable/ic_launcher_background" />
+
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:orientation="vertical"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        android:id="@+id/txtNom"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:textColor="#000000"
+        android:paddingLeft="30dp"
+        android:textStyle="bold"
+        android:text="" />
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        android:id="@+id/txtPrix"
+        android:layout_width="90dp"
+        android:layout_height="wrap_content"
+        android:textColor="#e60000"
+        android:paddingLeft="30dp"
+        android:textSize="16sp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/txtQte"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#0000FF"
+        android:paddingLeft="3dp"
+        android:layout_marginLeft="5dp"
+        android:text="" />
+    </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
