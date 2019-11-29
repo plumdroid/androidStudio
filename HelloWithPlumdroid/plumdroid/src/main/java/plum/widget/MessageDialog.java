@@ -6,14 +6,20 @@ import android.widget.TextView;
 
 public class MessageDialog implements
 DialogInterface.OnClickListener{
-	private String message; private String caption;
-	private AlertDialog alerte;private TextView view;
+	private String message;
+	private AlertDialog alerte;
+	private TextView view;
 	private Context context;
+
+	private OnClickMessageDialogListener callBack =null;
 	
-	private MessageDialog (Context context,String message, String caption) {
+	private  MessageDialog (Context context, String message, String captionGauche, String captionDroit,
+								OnClickMessageDialogListener callBack) {
 		this.message=message;
-		this.caption="Ok"; if(caption!=""){ this.caption=caption;}
 		this.context=context;
+		this.callBack = callBack;
+
+
 
 		//AlertDialog
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -22,8 +28,13 @@ DialogInterface.OnClickListener{
 
 		//AlertDialog alerte=new AlertDialog.Builder(context).create();
 		//alerte.setMessage(message);
-		
-		alerte.setButton(DialogInterface.BUTTON_NEUTRAL,this.caption,this);
+
+		String captionGaucheLocal ="Ok"; if(captionGauche!=""){ captionGaucheLocal=captionGauche;}
+		alerte.setButton(DialogInterface.BUTTON_NEUTRAL,captionGaucheLocal,this);
+
+		if ( captionGauche != null)
+		alerte.setButton(DialogInterface.BUTTON_NEGATIVE,captionDroit,this);
+
 		alerte.show();
 
 
@@ -37,11 +48,43 @@ DialogInterface.OnClickListener{
 	AlertDialog alerte=builder.create();
             alerte.show();*/
 	public static void show(Context context,String message, String caption){
-		MessageDialog myMessage=new MessageDialog(context,message, caption);
+		MessageDialog myMessage=new MessageDialog(context,message, caption, null,null);
 		}
+
+	public static void show(Context context,String message, String caption,
+							OnClickMessageDialogListener callBack ){
+		MessageDialog myMessage=new MessageDialog(context,message, caption, null,
+													callBack);
+	}
+
+	public static void show(Context context,String message, String captionGauche, String captionDroit){
+		MessageDialog myMessage=new MessageDialog(context,message, captionGauche,captionDroit,
+											null);
+	}
+
+	public static void show(Context context,String message, String captionGauche, String captionDroit,
+							OnClickMessageDialogListener callBack){
+		MessageDialog myMessage=new MessageDialog(context,message, captionGauche,captionDroit,
+													callBack);
+	}
 	
 	//// ------ évènements ////
 	public void onClick(DialogInterface dialog, int button) {
-			//alerte.cancel();
-		}	
+		char buttonChoice = '.';
+		switch (button) {
+			case DialogInterface.BUTTON_NEUTRAL:
+				buttonChoice = 'G';
+				break;
+			case DialogInterface.BUTTON_NEGATIVE:
+				buttonChoice = 'D';
+		}
+
+			if (callBack != null){
+				callBack.onClickMessageDialog(this, buttonChoice);
+			}
+	}
+
+	/// ----- interface Listener : public static interface Listener  ////
+	public static interface  OnClickMessageDialogListener {
+		public abstract void onClickMessageDialog( MessageDialog messageDialog, char buttonChoice);}
 }
