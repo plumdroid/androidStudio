@@ -21,12 +21,18 @@ import plum.webservice.norest.PlumDataBaseException;
 import plum.webservice.norest.PlumDataBaseReponse;
 import plum.widget.MessageDialog;
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity implements MessageDialog.OnClickMessageDialogListener {
     PlumDataBase webdata = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
+        MessageDialog.show(this,
+                "Des données ont été saisies, confirmez l'annulation",
+                "OUI","NON", this);
 
         //Création de PlumDataBase : paramètre=URL du webservice
         //le localhost avec AVD android est http://10.0.2.2/
@@ -60,6 +66,13 @@ public class MainActivity extends AppCompatActivity  {
         QueryListener q = new QueryListener( this );
         Button button_query = (Button)findViewById(R.id.button_query);
         button_query.setOnClickListener( q);
+    }
+
+    @Override
+    public void onClickMessageDialog(MessageDialog messageDialog, char button) {
+        Toast.makeText(this,"click" + button, Toast.LENGTH_LONG).show();
+
+
     }
 
 
