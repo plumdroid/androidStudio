@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import plum.widget.MessageDialog;
 
 public class  MainActivity extends AppCompatActivity implements
-        View.OnClickListener {
+        View.OnClickListener, MessageDialog.OnClickMessageDialogListener {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -22,6 +22,22 @@ public class  MainActivity extends AppCompatActivity implements
 
     //// Evènements ////
     public void onClick(View v) {
-        MessageDialog.show(this,"Hello...","Fermer" );
+
+        MessageDialog.show(this,
+                "Testez les boutons Gauche et Droite, en cliquant sur OUI ou NON",
+                "OUI","NON", this);
+
+    }
+
+    @Override
+    public void onClickMessageDialog(MessageDialog messageDialog, char c) {
+        switch (c) {
+            case 'G':
+                MessageDialog.show(this,"click Bouton Gauche","Fermer" );
+                break;
+            case 'D':
+                MessageDialog.show(this,"click Bouton Droit","Fermer" );
+                break;
+        }
     }
 }
