@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
 
 
 
-        MessageDialog.show(this,
+        MessageDialog.showModal(this,
                 "Des données ont été saisies, confirmez l'annulation",
                 "OUI","NON", this);
 
@@ -67,6 +67,49 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
         Button button_query = (Button)findViewById(R.id.button_query);
         button_query.setOnClickListener( q);
     }
+
+    protected void onStart() {
+        super.onStart();
+
+        // D�marrer la cam�ra ici
+        //-permet restart de la cam�ra apr�s onPause()
+        Log.i("hello.info", "hello.onStart");
+
+    }
+
+
+    protected void onResume() {
+        super.onResume();
+        Log.i("hello.info", "hello.onResume");
+
+
+    }
+
+
+    protected void onPause() {
+        super.onPause();
+        Log.i("hello.info", "hello.onPause");
+
+    }
+
+    protected void onStop() {
+        super.onStop();
+        Log.i("hello.info", "hello.onStop");
+    }
+
+    protected void onRestart() { // si onStop
+        super.onRestart();
+        Log.i("hello.info", "hello.onRestart");
+    }
+
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i("hello.info", "hello.onDestroy");
+    }
+
+
+
+
 
     @Override
     public void onClickMessageDialog(MessageDialog messageDialog, char button) {

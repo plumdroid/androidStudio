@@ -13,8 +13,10 @@ DialogInterface.OnClickListener{
 
 	private OnClickMessageDialogListener callBack =null;
 	
-	private  MessageDialog (Context context, String message, String captionGauche, String captionDroit,
-								OnClickMessageDialogListener callBack) {
+	private  MessageDialog (Context context, String message,
+							String captionGauche, String captionDroit,
+							OnClickMessageDialogListener callBack,
+							boolean isCanceledOnTouchOutside, boolean isCanceledOnBackButton) {
 		this.message=message;
 		this.context=context;
 		this.callBack = callBack;
@@ -35,6 +37,8 @@ DialogInterface.OnClickListener{
 		if ( captionGauche != null)
 		alerte.setButton(DialogInterface.BUTTON_NEGATIVE,captionDroit,this);
 
+		alerte.setCanceledOnTouchOutside(isCanceledOnTouchOutside);
+		alerte.setCancelable(isCanceledOnBackButton);
 		alerte.show();
 
 
@@ -48,26 +52,56 @@ DialogInterface.OnClickListener{
 	AlertDialog alerte=builder.create();
             alerte.show();*/
 	public static void show(Context context,String message, String caption){
-		MessageDialog myMessage=new MessageDialog(context,message, caption, null,null);
-		}
+		MessageDialog myMessage=new MessageDialog(context,message,
+				caption, null,null,
+				true,true);
+	}
 
 	public static void show(Context context,String message, String caption,
 							OnClickMessageDialogListener callBack ){
-		MessageDialog myMessage=new MessageDialog(context,message, caption, null,
-													callBack);
+		MessageDialog myMessage=new MessageDialog(context,message,
+				caption, null, callBack,
+				true,true);
 	}
 
 	public static void show(Context context,String message, String captionGauche, String captionDroit){
-		MessageDialog myMessage=new MessageDialog(context,message, captionGauche,captionDroit,
-											null);
+		MessageDialog myMessage=new MessageDialog(context,message,
+				captionGauche,captionDroit, null,
+				true,true);
 	}
 
 	public static void show(Context context,String message, String captionGauche, String captionDroit,
 							OnClickMessageDialogListener callBack){
-		MessageDialog myMessage=new MessageDialog(context,message, captionGauche,captionDroit,
-													callBack);
+		MessageDialog myMessage=new MessageDialog(context,message,
+				captionGauche,captionDroit, callBack,
+				true,true);
 	}
-	
+
+	public static void showModal(Context context,String message, String caption){
+		MessageDialog myMessage=new MessageDialog(context,message,
+				caption, null,null,
+				true,true);
+	}
+
+	public static void showModal(Context context,String message, String caption,
+								 OnClickMessageDialogListener callBack ){
+		MessageDialog myMessage=new MessageDialog(context,message,
+				caption, null, callBack,
+				false,false);
+	}
+
+	public static void showModal(Context context,String message, String captionGauche, String captionDroit){
+		MessageDialog myMessage=new MessageDialog(context,message,
+				captionGauche,captionDroit, null,
+				false,false);
+	}
+
+	public static void showModal(Context context,String message, String captionGauche, String captionDroit,
+								 OnClickMessageDialogListener callBack){
+		MessageDialog myMessage=new MessageDialog(context,message,
+				captionGauche,captionDroit, callBack,
+				false,false);
+	}
 	//// ------ évènements ////
 	public void onClick(DialogInterface dialog, int button) {
 		char buttonChoice = '.';
