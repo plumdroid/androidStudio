@@ -60,6 +60,7 @@ public class PlumDataBase {
 		HashMap<String, String> params = new HashMap<>();
 
 		String http = url + "contact/hello/";//url+"contact/hello/";//"http://www.fnac.com/";//
+
 		new HttpWebService( http, params, WEBSERVICE_CONTACT, onReponseListener, onErrorListener );
 
 		return;
@@ -77,6 +78,7 @@ public class PlumDataBase {
 		params.put("password", password);
 
 		String http = url + "authentification/connecter/";
+
 		new HttpWebService( http, params, WEBSERVICE_AUTHENTICATION, onReponseListener, onErrorListener );
 
 		return;
@@ -135,10 +137,12 @@ public class PlumDataBase {
 	 */
 	public void query(String sql, PlumDataBase.OnReponseListener onReponseListener, PlumDataBase.OnErrorListener onErrorListener) {
 		HashMap<String, String> params = new HashMap();
+
 		params.put("requete", sql);
 
 		String http = url + "webservice/query/";
-		new HttpWebService( http, params, WEBSERVICE_QUERY, onReponseListener, onErrorListener );
+
+		new HttpWebService( url, params, WEBSERVICE_QUERY, onReponseListener, onErrorListener );
 
 		return;
 	}
@@ -187,7 +191,8 @@ public class PlumDataBase {
 									final HashMap params,
 									final int webService,
 									final PlumDataBase.OnReponseListener onReponseListener,
-									final PlumDataBase.OnErrorListener onErrorListener) {
+									final PlumDataBase.OnErrorListener onErrorListener)
+				{
 
 			// This handler is used to wait for child thread message to update server response
 
@@ -210,13 +215,19 @@ public class PlumDataBase {
 
 					PlumDataBaseReponse d = null;
 					try {
-						d = new PlumDataBaseReponse(response, url, bundle.getInt(KEY_WEBSERVICE));
+						d = new PlumDataBaseReponse(response);
 					} catch (PlumDataBaseException e) {
-						onErrorListener.onError(new PlumDataBaseException(exception, "", ""));
+						onErrorListener.onError(new PlumDataBaseException(e.toString(),urlwebservice, response));
 						return;
 					}
 
-					onReponseListener.onReponse(d);
+					//etat==0 => réponse authentifiée
+					//etat ==100 & demande d'authenfication l'authentification a échouée
+					if (d.etat == 0 | (d.etat==100 &  webService == WEBSERVICE_AUTHENTICATION) ) {
+						onReponseListener.onReponse(d);
+					}else{
+						onErrorListener.onError(new PlumDataBaseException("NOT AUTHENTIFIED ",urlwebservice, response));
+					}
 
 				}
 
@@ -283,13 +294,14 @@ public class PlumDataBase {
 
 					} catch (
 							MalformedURLException e) {
-						exception = PlumDataBaseException.toStringException("Error in http connection URL malformed:" + e.toString(), urlwebservice, "");
+						exception = PlumDataBaseException.toStringException("Error in http connection URL malformed :" + e.toString(),
+								urlwebservice, "");
 					} catch (
 							SocketTimeoutException e) {
-						exception = PlumDataBaseException.toStringException("Error in http connection timeout:" + e.toString(), urlwebservice, "");
+						exception = PlumDataBaseException.toStringException("Error in http connection timeout :" + e.toString(), urlwebservice, "");
 					} catch (
 							IOException e) {
-						exception = PlumDataBaseException.toStringException("Error in http connection io:" + e.toString(), urlwebservice, "");
+						exception = PlumDataBaseException.toStringException("Error in http connection IO :" + e.toString(), urlwebservice, "");
 					} finally {
 						// http.disconnect();
 					}

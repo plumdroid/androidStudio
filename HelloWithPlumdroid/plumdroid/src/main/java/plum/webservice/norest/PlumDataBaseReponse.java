@@ -14,8 +14,6 @@ import android.database.MatrixCursor;
 
 public final class PlumDataBaseReponse {
 
-		public final int webService;
-
 		public final int etat;
 		public final String message;
 		public final String controleur;
@@ -24,15 +22,13 @@ public final class PlumDataBaseReponse {
 		
 		public final PDO pdo;
 
-		public PlumDataBaseReponse(String response, String url, int webService) throws PlumDataBaseException {
-
-			this.webService = webService;
+		public PlumDataBaseReponse(String response) throws PlumDataBaseException {
 
             JSONObject jsonReponse = null;
             try{
                 jsonReponse= new JSONObject(response);
             }catch(JSONException e){
-                throw new PlumDataBaseException("Error create JSONObject "+e.toString(), url ,response);
+                throw new PlumDataBaseException("Error create JSONObject "+e.toString(), "" ,"");
             }
 
             // Récupération des données
@@ -52,7 +48,7 @@ public final class PlumDataBaseReponse {
 					}
 				
 			}catch(JSONException e){
-				throw new PlumDataBaseException("Error JSON Récupération des données "+e.toString(),"","");
+				throw new PlumDataBaseException("Error JSON "+e.toString(),"","");
 			}	
 		}
 
@@ -97,7 +93,7 @@ public final class PlumDataBaseReponse {
 	    			}
 				
 			}catch(JSONException e){
-				throw new PlumDataBaseException("Error PDO "+e.toString(),"","");
+				throw new PlumDataBaseException("Error JSON "+e.toString(),"","");
 			}
 	    	}
 

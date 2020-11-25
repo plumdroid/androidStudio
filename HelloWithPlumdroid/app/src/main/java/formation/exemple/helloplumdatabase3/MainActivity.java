@@ -28,16 +28,23 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
+        /*
+        url=suivistage.boonum.fr ?
+        String cookie = CookieManager.getInstance().getCookie(url);
+        if (cookie != null) {
+            request.addRequestHeader("cookie", cookie);
+        }
+        https://stackoverflow.com/questions/57698818/android-webkit-cookiemanager-how-to-get-all-cookies-via-cookiemanager
+*/
         MessageDialog.showModal(this,
                 "Des données ont été saisies, confirmez l'annulation",
                 "OUI","NON", this);
 
         //Création de PlumDataBase : paramètre=URL du webservice
         //le localhost avec AVD android est http://10.0.2.2/
+        //"http://10.0.2.2:8080/PlumWebServiceDb/www/e/norest/"
 
-        webdata=new PlumDataBase("http://10.0.2.2:8080/PlumWebServiceDb/www/e/norest/");
+        webdata=new PlumDataBase("https://suivistage.boonum.fr/e/norest/");
 
         //-- Contact --
         webdata.contact(
@@ -66,6 +73,11 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
         QueryListener q = new QueryListener( this );
         Button button_query = (Button)findViewById(R.id.button_query);
         button_query.setOnClickListener( q);
+
+        Button button_authentification = (Button)findViewById(R.id.button_authentification);
+        AuthentificationListener auth = new AuthentificationListener( this );
+        button_authentification.setOnClickListener( auth);
+
     }
 
     protected void onStart() {
@@ -118,6 +130,45 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
 
     }
 
+    public class AuthentificationListener implements View.OnClickListener,
+            PlumDataBase.OnErrorListener,
+            PlumDataBase.OnReponseListener {
+        Context context;
+
+        public AuthentificationListener ( Context context){
+            this.context = context;
+        }
+
+        @Override
+        public void onClick(View view) {
+            String sql;
+            EditText edit_sql = (EditText) findViewById(R.id.edit_sql);
+            sql = edit_sql.getText().toString();
+            webdata.authentification("admin","admin", this, this);
+        }
+
+        @Override
+        public void onError(PlumDataBaseException error) {
+            String message = "ERROR AUTHENTIFICATION..." + error.toString();
+            MessageDialog.show(context, message, "Fermer");
+            Log.i("Error contact", message);
+        }
+
+        @Override
+        public void onReponse(PlumDataBaseReponse reponse) {
+            String message;
+            if (reponse.etat == 0) {
+                message = "AUTHENTIFICATION OK..."
+                        .concat("::Token = " + reponse.secure_token);
+            } else {
+                message = "ECHEC AUTHENTIFICATON ..."
+                        .concat("::Message = " + reponse.message);
+
+            }
+
+            MessageDialog.show(context, message, "Fermer");
+        }
+    }
 
     public class ExecuteListener implements View.OnClickListener,
             PlumDataBase.OnErrorListener,
@@ -127,6 +178,7 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
         public ExecuteListener ( Context context){
             this.context = context;
         }
+
         @Override
         public void onClick(View view) {
             String sql;
@@ -180,16 +232,6 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
             EditText edit_sql = (EditText) findViewById(R.id.edit_sql);
             sql = edit_sql.getText().toString();
             webdata.query(sql, this, this);
-
-            sql="select lib from webservice_test";
-
-            webdata.query(sql,
-                    new PlumDataBase.OnReponseListener(){
-                        @Override
-                        public void onReponse(PlumDataBaseReponse reponse) {
-                            Log.i("handle_query2",this.toString());
-                        }} ,
-                    this);
         }
 
         @Override
@@ -214,6 +256,9 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
                         .concat("::erreur SQL = " + reponse.pdo.errorInfo);
                 MessageDialog.show(context, message, "Fermer");
             }
+
+            MessageDialog.show(context, "rwocount=" +  reponse.pdo.rowCount,
+                    "Fermer");
 
 
             ArrayList<ContentValues> rows = reponse.pdo.listContentValues;
