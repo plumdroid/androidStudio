@@ -49,6 +49,9 @@ public class PlumDataBase {
     public static final int WEBSERVICE_QUERY = 3;
 	public static final int WEBSERVICE_AUTHENTICATION = 4;
 
+	// secure token courant : remplacr après chaque authentification réussie
+	private String secure_token="";
+
 	public PlumDataBase(String url) {
 
 		this.url = new String(url);
