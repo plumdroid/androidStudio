@@ -229,10 +229,7 @@ public class PlumDataBase {
 					//etat==0 => réponse authentifiée
 					//etat ==100 & demande d'authenfication l'authentification a échouée
 
-					CookieManager cookieManager = new CookieManager();
-					CookieHandler.setDefault(cookieManager);
-List lcook=cookieManager.getCookieStore().getCookies();
-List luri=cookieManager.getCookieStore().getURIs();
+
 					if (d.etat == 0 | (d.etat==100 &  webService == WEBSERVICE_AUTHENTICATION) ) {
 						onReponseListener.onReponse(d);
 					}else{
@@ -267,6 +264,8 @@ List luri=cookieManager.getCookieStore().getURIs();
 
 					String line = "";
 
+					CookieManager cookieManager = new CookieManager();
+					CookieHandler.setDefault(cookieManager);
 					HttpURLConnection http = null;
 					InputStreamReader isReader = null;
 
@@ -316,11 +315,15 @@ List luri=cookieManager.getCookieStore().getURIs();
 						// http.disconnect();
 					}
 
+
+					List lcook=cookieManager.getCookieStore().getCookies();
+					List luri=cookieManager.getCookieStore().getURIs();
 					String headerName = "";
 					String cookie="";
+					String header="";
 					for (int i = 1; (headerName = http.getHeaderFieldKey(i)) != null; i++)
 					{
-
+						header+=http.getHeaderFieldKey(i)+"="+http.getHeaderField(i)+",";
 						if(headerName.equals(KEY_COOKIE))
 						{
 							cookie =http.getHeaderField(i);
@@ -329,6 +332,7 @@ List luri=cookieManager.getCookieStore().getURIs();
 					}
 					Log.i("cookies",cookie);
 					bundle.putString(KEY_COOKIE, cookie);
+
 
 					// Send message to main thread to update response text in TextView after read all.
 					Message message = new Message();
