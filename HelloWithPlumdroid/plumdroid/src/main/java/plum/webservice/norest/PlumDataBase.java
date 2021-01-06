@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ConnectException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -17,6 +19,7 @@ import java.net.UnknownServiceException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -39,6 +42,7 @@ public class PlumDataBase {
 	private static final String KEY_RESPONSE_WEBSERVICE="KEY_RESPONSE_WEBSERVICE";
 	private static final String KEY_EXCEPTION="KEY_EXCEPTION";
 	private static final String KEY_WEBSERVICE="KEY_WEBSERVICE";
+	private static final String KEY_COOKIE="Set-Cookie";
 
 	public static final int WEBSERVICE_CONTACT = 1;
     public static final int WEBSERVICE_EXECUTE = 2;
@@ -80,6 +84,7 @@ public class PlumDataBase {
 		String http = url + "authentification/connecter/";
 
 		new HttpWebService( http, params, WEBSERVICE_AUTHENTICATION, onReponseListener, onErrorListener );
+
 
 		return;
 	}
@@ -223,6 +228,11 @@ public class PlumDataBase {
 
 					//etat==0 => réponse authentifiée
 					//etat ==100 & demande d'authenfication l'authentification a échouée
+
+					CookieManager cookieManager = new CookieManager();
+					CookieHandler.setDefault(cookieManager);
+List lcook=cookieManager.getCookieStore().getCookies();
+List luri=cookieManager.getCookieStore().getURIs();
 					if (d.etat == 0 | (d.etat==100 &  webService == WEBSERVICE_AUTHENTICATION) ) {
 						onReponseListener.onReponse(d);
 					}else{
@@ -306,13 +316,25 @@ public class PlumDataBase {
 						// http.disconnect();
 					}
 
+					String headerName = "";
+					String cookie="";
+					for (int i = 1; (headerName = http.getHeaderFieldKey(i)) != null; i++)
+					{
+
+						if(headerName.equals(KEY_COOKIE))
+						{
+							cookie =http.getHeaderField(i);
+						}
+
+					}
+					Log.i("cookies",cookie);
+					bundle.putString(KEY_COOKIE, cookie);
+
 					// Send message to main thread to update response text in TextView after read all.
 					Message message = new Message();
 
 					// Set message type.
 					message.what = HTTP_REQUEST_RESPONSE;
-
-					// Create a bundle object.
 
 					// Put response text in the bundle with the special key.
 					bundle.putString(KEY_RESPONSE_WEBSERVICE, line);
@@ -320,6 +342,8 @@ public class PlumDataBase {
 					bundle.putString(KEY_EXCEPTION, exception);
 
 					message.setData(bundle);
+
+
 					// Send message to main thread Handler to process.
 					uiUpdater.sendMessage(message);
 				}

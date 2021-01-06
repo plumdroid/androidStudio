@@ -36,9 +36,9 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
         }
         https://stackoverflow.com/questions/57698818/android-webkit-cookiemanager-how-to-get-all-cookies-via-cookiemanager
 */
-        MessageDialog.showModal(this,
+       /* MessageDialog.showModal(this,
                 "Des données ont été saisies, confirmez l'annulation",
-                "OUI","NON", this);
+                "OUI","NON", this);*/
 
         //Création de PlumDataBase : paramètre=URL du webservice
         //le localhost avec AVD android est http://10.0.2.2/
@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
                     public void onReponse(PlumDataBaseReponse reponse) {
                         String message = "OK.CONTACT.." + "etat:" + reponse.etat;
                         Toast.makeText(getApplicationContext(),message, Toast.LENGTH_LONG).show();
+
                     }
                 },
                 new PlumDataBase.OnErrorListener(){
