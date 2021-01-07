@@ -10,10 +10,13 @@ import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownServiceException;
 import java.util.ArrayList;
@@ -49,9 +52,6 @@ public class PlumDataBase {
     public static final int WEBSERVICE_QUERY = 3;
 	public static final int WEBSERVICE_AUTHENTICATION = 4;
 
-	// secure token courant : remplacr après chaque authentification réussie
-	private String secure_token="";
-
 	public PlumDataBase(String url) {
 
 		this.url = new String(url);
@@ -68,7 +68,7 @@ public class PlumDataBase {
 
 		String http = url + "contact/hello/";//url+"contact/hello/";//"http://www.fnac.com/";//
 
-		new HttpWebService( http, params, WEBSERVICE_CONTACT, onReponseListener, onErrorListener );
+		new HttpWebService(url, http, params, WEBSERVICE_CONTACT, onReponseListener, onErrorListener );
 
 		return;
 	}
@@ -86,7 +86,7 @@ public class PlumDataBase {
 
 		String http = url + "authentification/connecter/";
 
-		new HttpWebService( http, params, WEBSERVICE_AUTHENTICATION, onReponseListener, onErrorListener );
+		new HttpWebService( url,http, params, WEBSERVICE_AUTHENTICATION, onReponseListener, onErrorListener );
 
 
 		return;
@@ -104,7 +104,7 @@ public class PlumDataBase {
 
 
 		String http = url + "webservice/execute/";
-		new HttpWebService( http, params, WEBSERVICE_EXECUTE, onReponseListener, onErrorListener );
+		new HttpWebService( this.url, http, params, WEBSERVICE_EXECUTE, onReponseListener, onErrorListener );
 
 		return;
 
@@ -130,7 +130,7 @@ public class PlumDataBase {
 		}
 
 		String http = url + "webservice/execute/";
-		new HttpWebService( http, params, WEBSERVICE_EXECUTE, onReponseListener, onErrorListener );
+		new HttpWebService( url, http, params, WEBSERVICE_EXECUTE, onReponseListener, onErrorListener );
 
 		return;
 
@@ -150,7 +150,7 @@ public class PlumDataBase {
 
 		String http = url + "webservice/query/";
 
-		new HttpWebService( url, params, WEBSERVICE_QUERY, onReponseListener, onErrorListener );
+		new HttpWebService( url,http, params, WEBSERVICE_QUERY, onReponseListener, onErrorListener );
 
 		return;
 	}
@@ -174,7 +174,7 @@ public class PlumDataBase {
 		}
 
 		String http = url + "webservice/query/";
-		new HttpWebService( http, params, WEBSERVICE_QUERY, onReponseListener, onErrorListener );
+		new HttpWebService(url, http, params, WEBSERVICE_QUERY, onReponseListener, onErrorListener );
 
 		return;
 	}
@@ -195,7 +195,8 @@ public class PlumDataBase {
 		// This handler used to listen to child thread show return page html text message and display those text in responseTextView.
 		public Handler uiUpdater = null;
 		@SuppressLint("HandlerLeak")
-		public HttpWebService(final String urlwebservice,
+		public HttpWebService(final String uri,
+									final String http_webservice,
 									final HashMap params,
 									final int webService,
 									final PlumDataBase.OnReponseListener onReponseListener,
@@ -203,6 +204,13 @@ public class PlumDataBase {
 				{
 
 			// This handler is used to wait for child thread message to update server response
+
+					//Manager les cookies
+					if (CookieHandler.getDefault() == null) {
+						CookieManager cookieManager = new CookieManager();
+						CookieHandler.setDefault(cookieManager);
+					}
+
 
 			//Handler uiUpdater = null;
 			uiUpdater = new Handler() {
@@ -225,18 +233,34 @@ public class PlumDataBase {
 					try {
 						d = new PlumDataBaseReponse(response);
 					} catch (PlumDataBaseException e) {
-						onErrorListener.onError(new PlumDataBaseException(e.toString(),urlwebservice, response));
+						onErrorListener.onError(new PlumDataBaseException(e.toString(),http_webservice, response));
 						return;
 					}
+
+				CookieManager cookieManager = (CookieManager) CookieHandler.getDefault();
+
+					// mémorisation de secure_token sur Authentification
+					//le cookie secure_token est à usage local (le serveur ne gère pas ce cookie)
+					if (webService == WEBSERVICE_AUTHENTICATION & d.etat==0) {
+						HttpCookie cookie = new HttpCookie("secure_token", d.secure_token);
+						try {
+
+								cookieManager.getCookieStore().add(new URI(uri), cookie);
+							} catch (URISyntaxException e) {
+								e.printStackTrace();
+							}
+					}
+
+					List lcook=cookieManager.getCookieStore().getCookies();
+					List luri=cookieManager.getCookieStore().getURIs();
 
 					//etat==0 => réponse authentifiée
 					//etat ==100 & demande d'authenfication l'authentification a échouée
 
-
 					if (d.etat == 0 | (d.etat==100 &  webService == WEBSERVICE_AUTHENTICATION) ) {
 						onReponseListener.onReponse(d);
 					}else{
-						onErrorListener.onError(new PlumDataBaseException("NOT AUTHENTIFIED ",urlwebservice, response));
+						onErrorListener.onError(new PlumDataBaseException("NOT AUTHENTIFIED ",http_webservice, response));
 					}
 
 				}
@@ -265,16 +289,26 @@ public class PlumDataBase {
 						}
 					}
 
+					//clé secure_token
+					CookieManager cookieManager = (CookieManager) CookieHandler.getDefault();
+					List<HttpCookie> lcook = cookieManager.getCookieStore().getCookies();
+					String secure_token="";
+					for(HttpCookie cookie : lcook){
+						if (cookie.getName().equals("secure_token")){
+							secure_token = cookie.getValue();
+							paramPost += "&secure_token=" + secure_token;
+							break;
+						}
+					}
+
 					String line = "";
 
-					CookieManager cookieManager = new CookieManager();
-					CookieHandler.setDefault(cookieManager);
 					HttpURLConnection http = null;
 					InputStreamReader isReader = null;
 
-					String urlString = urlwebservice;
+					String urlString = http_webservice;
 					try {
-						URL url = new URL(urlwebservice);
+						URL url = new URL(http_webservice);
 
 						http = (HttpURLConnection) url.openConnection();
 
@@ -307,24 +341,21 @@ public class PlumDataBase {
 					} catch (
 							MalformedURLException e) {
 						exception = PlumDataBaseException.toStringException("Error in http connection URL malformed :" + e.toString(),
-								urlwebservice, "");
+								http_webservice, "");
 					} catch (
 							SocketTimeoutException e) {
-						exception = PlumDataBaseException.toStringException("Error in http connection timeout :" + e.toString(), urlwebservice, "");
+						exception = PlumDataBaseException.toStringException("Error in http connection timeout :" + e.toString(), http_webservice, "");
 					} catch (
 							IOException e) {
-						exception = PlumDataBaseException.toStringException("Error in http connection IO :" + e.toString(), urlwebservice, "");
+						exception = PlumDataBaseException.toStringException("Error in http connection IO :" + e.toString(), http_webservice, "");
 					} finally {
 						// http.disconnect();
 					}
 
-
-					List lcook=cookieManager.getCookieStore().getCookies();
-					List luri=cookieManager.getCookieStore().getURIs();
 					String headerName = "";
 					String cookie="";
 					String header="";
-					for (int i = 1; (headerName = http.getHeaderFieldKey(i)) != null; i++)
+					/*for (int i = 1; (headerName = http.getHeaderFieldKey(i)) != null; i++)
 					{
 						header+=http.getHeaderFieldKey(i)+"="+http.getHeaderField(i)+",";
 						if(headerName.equals(KEY_COOKIE))
@@ -334,7 +365,7 @@ public class PlumDataBase {
 
 					}
 					Log.i("cookies",cookie);
-					bundle.putString(KEY_COOKIE, cookie);
+					bundle.putString(KEY_COOKIE, cookie);*/
 
 
 					// Send message to main thread to update response text in TextView after read all.
