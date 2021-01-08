@@ -27,18 +27,7 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        /*
-        url=suivistage.boonum.fr ?
-        String cookie = CookieManager.getInstance().getCookie(url);
-        if (cookie != null) {
-            request.addRequestHeader("cookie", cookie);
-        }
-        https://stackoverflow.com/questions/57698818/android-webkit-cookiemanager-how-to-get-all-cookies-via-cookiemanager
-*/
-       /* MessageDialog.showModal(this,
-                "Des données ont été saisies, confirmez l'annulation",
-                "OUI","NON", this);*/
+        Log.i("hello.info", "hello.onCreate");
 
         //Création de PlumDataBase : paramètre=URL du webservice
         //le localhost avec AVD android est http://10.0.2.2/
@@ -145,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
             String sql;
             EditText edit_sql = (EditText) findViewById(R.id.edit_sql);
             sql = edit_sql.getText().toString();
-            webdata.authentification("admin","admin", this, this);
+            webdata.authentification("@hsggn7hhhHHHHTTT777hhhTTFQ@","@@", this, this);
         }
 
         @Override

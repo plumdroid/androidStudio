@@ -210,7 +210,9 @@ public class PlumDataBase {
 						CookieManager cookieManager = new CookieManager();
 						CookieHandler.setDefault(cookieManager);
 					}
-
+					CookieManager cookieManager = (CookieManager) CookieHandler.getDefault();
+					List lcook=cookieManager.getCookieStore().getCookies();
+					List luri=cookieManager.getCookieStore().getURIs();
 
 			//Handler uiUpdater = null;
 			uiUpdater = new Handler() {
@@ -237,22 +239,19 @@ public class PlumDataBase {
 						return;
 					}
 
-				CookieManager cookieManager = (CookieManager) CookieHandler.getDefault();
+
 
 					// mémorisation de secure_token sur Authentification
 					//le cookie secure_token est à usage local (le serveur ne gère pas ce cookie)
 					if (webService == WEBSERVICE_AUTHENTICATION & d.etat==0) {
 						HttpCookie cookie = new HttpCookie("secure_token", d.secure_token);
 						try {
-
+							CookieManager cookieManager = (CookieManager) CookieHandler.getDefault();
 								cookieManager.getCookieStore().add(new URI(uri), cookie);
 							} catch (URISyntaxException e) {
 								e.printStackTrace();
 							}
 					}
-
-					List lcook=cookieManager.getCookieStore().getCookies();
-					List luri=cookieManager.getCookieStore().getURIs();
 
 					//etat==0 => réponse authentifiée
 					//etat ==100 & demande d'authenfication l'authentification a échouée
