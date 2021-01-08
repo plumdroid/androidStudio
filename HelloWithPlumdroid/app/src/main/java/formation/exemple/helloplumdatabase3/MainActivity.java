@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements MessageDialog.OnC
             String sql;
             EditText edit_sql = (EditText) findViewById(R.id.edit_sql);
             sql = edit_sql.getText().toString();
-            webdata.authentification("","", this, this);
+            webdata.authentification("@hsggn7hhhHHHHTTT777hhhTTFQ@","@@", this, this);
         }
 
         @Override
