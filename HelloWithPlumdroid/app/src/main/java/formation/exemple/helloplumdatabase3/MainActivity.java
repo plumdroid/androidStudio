@@ -21,9 +21,9 @@ import plum.webservice.norest.PlumDataBaseException;
 import plum.webservice.norest.PlumDataBaseReponse;
 import plum.widget.MessageDialog;
 
-public class MainActivity extends AppCompatActivity
-        implements MessageDialog.OnClickMessageDialogListener {
-    PlumDataBase webdata = null;
+public class MainActivity extends AppCompatActivity {
+
+    static PlumDataBase webdata = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,33 +35,10 @@ public class MainActivity extends AppCompatActivity
         //le localhost avec AVD android est http://10.0.2.2/
         //"http://10.0.2.2:8080/PlumWebServiceDb/www/e/norest/"
 
-        webdata = new PlumDataBase("https://suivistage.boonum.fr/e/norest/");
-
+        webdata = new PlumDataBase("http://10.0.2.2:8080/PlumWebServiceDb/www/e/norest/");
         //-- Contact --
-        webdata.contact(
-                new PlumDataBase.OnReponseListener() {
-                    @Override
-                    public void onReponseSucceed(PlumDataBaseReponse reponse) {
-                        String message = "OK.CONTACT.." + "etat:" + reponse.etat;
-                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-
-                    }
-                    public void onReponseError(PlumDataBaseReponse reponse) {
-                        String message = "ERROR CONTACT.." + "etat:" + reponse.etat;
-                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-
-                    }
-                },
-                new PlumDataBase.OnExceptionListener() {
-                    @Override
-                    public void onException(PlumDataBaseException error) {
-                        Context c = getApplicationContext();
-                        String message = "...EXCEPTION CONTACT..." + error.toString();
-                        Toast.makeText(c, message, Toast.LENGTH_LONG).show();
-
-                        Log.i("CONTACT...", message);
-                    }
-                });
+        ContactListener contactListener = new ContactListener(this);
+        webdata.contact( contactListener, contactListener);
 
         ExecuteListener e = new ExecuteListener(this);
         Button button_execute = (Button) findViewById(R.id.button_execute);
@@ -77,51 +54,39 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    protected void onStart() {
-        super.onStart();
+    public class ContactListener implements
+            PlumDataBase.OnExceptionListener,
+            PlumDataBase.OnReponseListener {
+        Context context;
 
-        // D�marrer la cam�ra ici
-        //-permet restart de la cam�ra apr�s onPause()
-        Log.i("hello.info", "hello.onStart");
+        public ContactListener(Context context) {
+            this.context = context;
+        }
 
-    }
+        @Override
+        public void onReponseSucceed(PlumDataBaseReponse reponse) {
+            String message = "CONTACT OK...";
+            MessageDialog.show(context, message, "Fermer");
+        }
 
-
-    protected void onResume() {
-        super.onResume();
-        Log.i("hello.info", "hello.onResume");
-
-
-    }
-
-
-    protected void onPause() {
-        super.onPause();
-        Log.i("hello.info", "hello.onPause");
-
-    }
-
-    protected void onStop() {
-        super.onStop();
-        Log.i("hello.info", "hello.onStop");
-    }
-
-    protected void onRestart() { // si onStop
-        super.onRestart();
-        Log.i("hello.info", "hello.onRestart");
-    }
-
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.i("hello.info", "hello.onDestroy");
-    }
+        // --- Le webservice répond mais son état est différent de 0 (0 = tout est OK)
+        // ------- etat = 100 -> vous devez vous authentifier pour accéder au service
+        @Override
+        public void onReponseError(PlumDataBaseReponse reponse) {
+            String message = "ECHEC CONTACT..." + reponse.message;
+            MessageDialog.show(context, message, "Fermer");
+            Log.i("Error contact", message);
+        }
 
 
-    @Override
-    public void onClickMessageDialog(MessageDialog messageDialog, char button) {
-        Toast.makeText(this, "click" + button, Toast.LENGTH_LONG).show();
-
-
+        // --- Si problème HTTP
+        // --- Si problème Json
+        @Override
+        public void onException(PlumDataBaseException e) {
+            String message = "EXCEPTION CONTACT..." + e.toString();
+            MessageDialog.show(context, message, "Fermer");
+            Log.i("Error contact", message);
+        }
     }
 
     public class AuthentificationListener implements View.OnClickListener,
@@ -138,8 +103,17 @@ public class MainActivity extends AppCompatActivity
             String sql;
             EditText edit_sql = (EditText) findViewById(R.id.edit_sql);
             sql = edit_sql.getText().toString();
-            webdata.authentification("@", "@@",
+            webdata.authentification("agnes.bourgeois", "ag",
                     this, this);
+        }
+
+        @Override
+        public void onReponseSucceed(PlumDataBaseReponse reponse) {
+
+            String message = "AUTHENTIFICATION OK..."
+                    .concat("::Token = " + reponse.secure_token);
+
+            MessageDialog.show(context, message, "Fermer");
         }
 
         @Override
@@ -156,14 +130,7 @@ public class MainActivity extends AppCompatActivity
             Log.i("Error contact", message);
         }
 
-        @Override
-        public void onReponseSucceed(PlumDataBaseReponse reponse) {
 
-            String message = "AUTHENTIFICATION OK..."
-                    .concat("::Token = " + reponse.secure_token);
-
-            MessageDialog.show(context, message, "Fermer");
-        }
     }
 
     public class ExecuteListener implements View.OnClickListener,
@@ -254,7 +221,7 @@ public class MainActivity extends AppCompatActivity
             Log.i("handle_query1", this.toString());
             // Uniquement en phase de test !!
             if (reponse.pdo.error != 0) {
-                message = "::ERREURQUERY..."
+                message = "REPONSE SUCCEED ::ERREURQUERY..."
                         .concat("::SQL = " + sql)
                         .concat("::erreur SQL = " + reponse.pdo.errorInfo);
                 MessageDialog.show(context, message, "Fermer");
@@ -288,4 +255,45 @@ public class MainActivity extends AppCompatActivity
             Log.i("Error query", message);
         }
     }
+
+    protected void onStart() {
+        super.onStart();
+
+        // D�marrer la cam�ra ici
+        //-permet restart de la cam�ra apr�s onPause()
+        Log.i("hello.info", "hello.onStart");
+
+    }
+
+
+    protected void onResume() {
+        super.onResume();
+        Log.i("hello.info", "hello.onResume");
+
+
+    }
+
+
+    protected void onPause() {
+        super.onPause();
+        Log.i("hello.info", "hello.onPause");
+
+    }
+
+    protected void onStop() {
+        super.onStop();
+        Log.i("hello.info", "hello.onStop");
+    }
+
+    protected void onRestart() { // si onStop
+        super.onRestart();
+        Log.i("hello.info", "hello.onRestart");
+    }
+
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i("hello.info", "hello.onDestroy");
+    }
+
+
 }
