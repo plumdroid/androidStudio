@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         //le localhost avec AVD android est http://10.0.2.2/
         //"http://10.0.2.2:8080/PlumWebServiceDb/www/e/norest/"
 
-        webdata = new PlumDataBase("http://10.0.2.2:8080/PlumWebServiceDb/www/e/norest/");
+        webdata = new PlumDataBase("http://www.norest.boonum.fr/e/norest/");
         //-- Contact --
         ContactListener contactListener = new ContactListener(this);
         webdata.contact( contactListener, contactListener);
