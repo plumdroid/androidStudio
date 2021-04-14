@@ -19,9 +19,10 @@ import java.util.ArrayList;
 import plum.webservice.norest.PlumDataBase;
 import plum.webservice.norest.PlumDataBaseException;
 import plum.webservice.norest.PlumDataBaseReponse;
+import plum.widget.ComboDialog;
 import plum.widget.MessageDialog;
 
-public class MainActivity  extends Activity {
+public class MainActivity  extends Activity implements ComboDialog.OnClickComboDialogListener {
 
     static PlumDataBase webdata = null;
 
@@ -35,7 +36,7 @@ public class MainActivity  extends Activity {
         //le localhost avec AVD android est http://10.0.2.2/
         //"http://10.0.2.2:8080/PlumWebServiceDb/www/e/norest/"
 
-        webdata = new PlumDataBase("http://www.norest.boonum.fr/e/norest/");
+      /*  webdata = new PlumDataBase("http://www.norest.boonum.fr/e/norest/");
         //-- Contact --
         ContactListener contactListener = new ContactListener(this);
         webdata.contact( contactListener, contactListener);
@@ -50,10 +51,34 @@ public class MainActivity  extends Activity {
 
         Button button_authentification = (Button) findViewById(R.id.button_authentification);
         AuthentificationListener auth = new AuthentificationListener(this);
-        button_authentification.setOnClickListener(auth);
+        button_authentification.setOnClickListener(auth);*/
+
+        //--- test ComboDialog
+        ComboDialog c;
+        CharSequence[] items={"a","b","Ne pas retenir","Autre..."};
+        CharSequence[] values={"1","2","1000","autre"};
+
+        String titre = "Hello";
+        c=new ComboDialog(titre, items, values, null, this);
+        c.setOnClickComboDialogListener( this);
+        c.selected(1);
+        c.show();
 
     }
+    public void onClickComboDialog(ComboDialog comboDialog) {
+        if ( comboDialog.getIndexSelected() == comboDialog.getCompteur()-1){
+            CharSequence[] items={"c","d","Autre..."};
+            CharSequence[] values={"1","2","autre"};
+            ComboDialog c;
+            c=new ComboDialog("titre", items, values, null, this);
+            c.setOnClickComboDialogListener( this);
+            c.show();
+            return;
+        }
 
+        String value = (String) comboDialog.value(comboDialog.getIndexSelected());
+        comboDialog.show();
+    }
     public class ContactListener implements
             PlumDataBase.OnExceptionListener,
             PlumDataBase.OnReponseListener {

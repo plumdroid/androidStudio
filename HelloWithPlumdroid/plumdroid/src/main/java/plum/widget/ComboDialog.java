@@ -11,24 +11,32 @@ DialogInterface.OnClickListener{
 	private int indexSelected; 
 	private OnClickComboDialogListener callback;
 	private AlertDialog alerte;private TextView view;
-	
+	private String title;
+	private Context context;
+
 	public ComboDialog (String title, CharSequence items[], CharSequence values[],
 			TextView view, Context context) {
+		this.title = title;
 		this.items=items; this.values=values;
 		this.callback=null;
-		this.indexSelected=-1;this.view=view;
-		
+		this.indexSelected=-1;
+		this.view=view;
+		this.context = context;
+
+		if ( view !=null ) view.setOnClickListener(this);
+		}
+	
+	public void show(){
 		//AlertDialog
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setTitle(title);
 		//builder.setItems(items,this);
 		builder.setSingleChoiceItems(items,indexSelected, this);
+
 		alerte=builder.create();
-		
-		if ( view !=null ) view.setOnClickListener(this);
-		}
-	
-	public void show(){alerte.show();}
+
+		alerte.show();
+	}
 	
 	public int getIndexSelected() {return indexSelected;}
 	
@@ -53,7 +61,8 @@ DialogInterface.OnClickListener{
 	public void onClick(View v) {
 		this.show();
 	}
-		
+
+
 	/// ----- interface Listener : public static interface Listener  ////	
 	public static interface  OnClickComboDialogListener {
 		public abstract void onClickComboDialog( ComboDialog comboDialog);}
