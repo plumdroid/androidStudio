@@ -1,10 +1,10 @@
 package formation.exemple.helloplumdatabase3;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -21,7 +21,7 @@ import plum.webservice.norest.PlumDataBaseException;
 import plum.webservice.norest.PlumDataBaseReponse;
 import plum.widget.MessageDialog;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity  extends Activity {
 
     static PlumDataBase webdata = null;
 
