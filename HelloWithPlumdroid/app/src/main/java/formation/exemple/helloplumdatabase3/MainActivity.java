@@ -55,13 +55,30 @@ public class MainActivity  extends Activity implements ComboDialog.OnClickComboD
 
         //--- test ComboDialog
         ComboDialog c;
-        CharSequence[] items={"a","b","Ne pas retenir","Autre..."};
+       /* CharSequence[] items={"a","b","Ne pas retenir","Autre..."};
         CharSequence[] values={"1","2","1000","autre"};
 
         String titre = "Hello";
         c=new ComboDialog(titre, items, values, null, this);
         c.setOnClickComboDialogListener( this);
         c.selected(1);
+        c.show();*/
+        ArrayList<String>  items = new ArrayList();
+        ArrayList<String>  values = new ArrayList();
+        ArrayList<String>  excludes = new ArrayList();
+        items.add("a");
+        items.add("b");
+        items.add("c");
+
+        values.add("1");
+        values.add("2");
+        values.add("3");
+
+        excludes.add("2");
+        c = new ComboDialog ("test", items,values,excludes,null,this);
+        c.selectedValue("3");
+
+        c.setOnClickComboDialogListener( this);
         c.show();
 
     }
